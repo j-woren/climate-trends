@@ -2,3 +2,8 @@
 *.db
 *.csv
 /BERTopic_model
+/data2013-23/BERTopic_model
+/data2013-23*
+data2013-23/
+data2013-23
+data2013-23*

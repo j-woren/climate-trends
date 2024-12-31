@@ -7,7 +7,14 @@ nltk.download("stopwords")
 from nltk.corpus import stopwords
 
 # Set up stop words
-stop_words = stopwords.words("english")
+stopwords = stopwords.words("english")
+scientific_stop_words = ['article', 'articles', 'essay', 'essays', 'et', 'al', 'issue',
+'study', 'studies', 'review', 'reviews',
+'published', 'accessed via', 'published', 'accessed', 'amendment', 'paper', 'doi', 'https', 'com', 'orcid',
+'authors', 'author', 'html', 'de', 'la', 'en', 'los',
+'und', 'die', 'der', 'von', 'introduction', 'results', 'methods', 'conclusion', 'abstract', 'vol', 'no', 'pp',
+'eq', 'fig','table', 'supp', 'supplementary','www', 'org', 'edu', 'net', 'gov', 'le', 'les']
+stop_words.extend(scientific_stop_words)
 
 # Configure vectorizer and load data
 vectorizer_model = CountVectorizer(stop_words=stop_words, ngram_range=(1, 3))
@@ -20,7 +27,7 @@ cdf_subs['cleaned_abstract'] = cdf_subs['cleaned_abstract'].astype(str)
 word_embedding_model = models.Transformer("allenai/scibert_scivocab_uncased")
 pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
 embedding_model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
-topic_model = BERTopic(embedding_model=embedding_model, vectorizer_model=vectorizer_model)
+topic_model = BERTopic(embedding_model=embedding_model, vectorizer_model=vectorizer_model, min_topic_size = 24)
 
 # Fit-transform and extract topics and probabilities
 topics, probabilities = topic_model.fit_transform(cdf_subs['cleaned_abstract'].tolist())

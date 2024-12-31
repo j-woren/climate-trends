@@ -1,7 +1,7 @@
 ##### Extract Abstracts and Associated Data ######################
 #     The goal of this script is to use the habanero package
 #     to access CrossRef's API and extract abstracts published
-#     since 2013 and additional meta-data 
+#     since 2000 and additional meta-data 
 
 #### Imports #####################################################
 from habanero import Crossref
@@ -12,7 +12,7 @@ import json
 cr = Crossref()
 
 #### Main ########################################################
-years_of_interest = range(2017,2024)
+years_of_interest = range(2000,2024)
 
 for year in years_of_interest:
     res = cr.works(query = "climate warming CO2",
