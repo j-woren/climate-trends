@@ -5,9 +5,19 @@ from sklearn.feature_extraction.text import CountVectorizer
 import nltk
 nltk.download("stopwords")
 from nltk.corpus import stopwords
+import numpy as np
+import torch
+
+SEED = 123
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+torch.cuda.manual_seed_all(SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 # Set up stop words
-stopwords = stopwords.words("english")
+stop_words = stopwords.words("english")
 scientific_stop_words = ['article', 'articles', 'essay', 'essays', 'et', 'al', 'issue',
 'study', 'studies', 'review', 'reviews',
 'published', 'accessed via', 'published', 'accessed', 'amendment', 'paper', 'doi', 'https', 'com', 'orcid',
@@ -27,7 +37,7 @@ cdf_subs['cleaned_abstract'] = cdf_subs['cleaned_abstract'].astype(str)
 word_embedding_model = models.Transformer("allenai/scibert_scivocab_uncased")
 pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
 embedding_model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
-topic_model = BERTopic(embedding_model=embedding_model, vectorizer_model=vectorizer_model, min_topic_size = 24)
+topic_model = BERTopic(embedding_model=embedding_model, vectorizer_model=vectorizer_model, random_state = SEED)
 
 # Fit-transform and extract topics and probabilities
 topics, probabilities = topic_model.fit_transform(cdf_subs['cleaned_abstract'].tolist())
