@@ -8,7 +8,6 @@ from nltk.corpus import stopwords
 import numpy as np
 import torch
 import random
-from umap import UMAP
 
 SEED = 123
 random.seed(SEED)
@@ -40,11 +39,8 @@ word_embedding_model = models.Transformer("allenai/scibert_scivocab_uncased")
 pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
 embedding_model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
 
-# Initialize UMAP model 
-umap_model = UMAP(n_neighbors=15, n_components=10, metric='cosine', low_memory=False, random_state = SEED)
-
 #Initialize BERTopic
-topic_model = BERTopic(embedding_model=embedding_model, vectorizer_model=vectorizer_model, umap_model=umap_model)
+topic_model = BERTopic(embedding_model=embedding_model, vectorizer_model=vectorizer_model)
 
 # Fit-transform and extract topics and probabilities
 topics, probabilities = topic_model.fit_transform(cdf_subs['cleaned_abstract'].tolist())
