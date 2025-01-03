@@ -18,6 +18,7 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 # Set up stop words
+print("Setting up stop words")
 stop_words = stopwords.words("english")
 scientific_stop_words = ['article', 'articles', 'essay', 'essays', 'et', 'al', 'issue',
 'study', 'studies', 'review', 'reviews',
@@ -27,39 +28,51 @@ scientific_stop_words = ['article', 'articles', 'essay', 'essays', 'et', 'al', '
 'eq', 'fig','table', 'supp', 'supplementary','www', 'org', 'edu', 'net', 'gov', 'le', 'les']
 stop_words.extend(scientific_stop_words)
 
-# Configure vectorizer and load data
+# Configure vectorizer
+print("Configuring vectorizer")
 vectorizer_model = CountVectorizer(stop_words=stop_words, ngram_range=(1, 3))
+
+# Load data
+print("Load data")
 cdf_subs = pd.read_csv('/Users/trevor/Desktop/Research/climate-trends/unique_english_abstract_not_null.csv')
 cdf_subs = cdf_subs.dropna(subset=['cleaned_abstract'])
 cdf_subs['cleaned_abstract'] = cdf_subs['cleaned_abstract'].astype(str)
+print("Data loaded")
 
 # Initialize embedding model
 # use the SciBERT embedding model
+print("Initialize embedding model")
 word_embedding_model = models.Transformer("allenai/scibert_scivocab_uncased")
 pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
 embedding_model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
 
 #Initialize BERTopic
+print("Initialize BERTopic")
 topic_model = BERTopic(embedding_model=embedding_model, vectorizer_model=vectorizer_model)
 
 # Fit-transform and extract topics and probabilities
+print("Fit-transform, extract topics and probabilities")
 topics, probabilities = topic_model.fit_transform(cdf_subs['cleaned_abstract'].tolist())
 
 # Add topics and probabilities to the DataFrame
+print("Add topics and probabilities to the DataFrame")
 cdf_subs['topic'] = topics
 cdf_subs['probability'] = probabilities
 
 # Get topic information and merge with the DataFrame
+print("Get topic information and merge with the DataFrame")
 topic_info = topic_model.get_topic_info()
 topic_info.rename(columns={'Topic': 'topic'}, inplace=True)
 cdf_subs = cdf_subs.merge(topic_info[['topic', 'Name']], on='topic', how='left')
 
 # Generate embeddings for the abstracts and add them to the DataFrame
+print("Generate embeddings for the abstracts and add them to the DataFrame")
 embeddings = embedding_model.encode(cdf_subs['cleaned_abstract'].tolist(), show_progress_bar=True)
 cdf_subs['embedding'] = embeddings.tolist()
 
+print("Save model and data")
+# Save the model
 topic_model.save("/Users/trevor/Desktop/Research/climate-trends/BERTopic_model")
-
 # Save the DataFrame to a JSON file
 cdf_subs.to_json('/Users/trevor/Desktop/Research/climate-trends/unique_english_abstract_not_null_bertopic_embeddings.json', 
                  orient='records', 
